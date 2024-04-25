@@ -2,8 +2,6 @@ from google.cloud import bigquery
 from datetime import datetime
 import pandas as pd
 
-__version__ = "1.0.0"
-
 def writeDfToBq(data:pd.DataFrame, project_id:str, dataset_id:str, table_id:str, job_id_prefix:str) -> bigquery.load_job:
     """
     Writes a pandas DataFrame to a BigQuery table.
