@@ -1,0 +1,25 @@
+[project]
+name = "write_to_bq"
+version = "1.0.1"
+authors = [
+  { name="Alessandro Cosci", email="alessandro.cosci@sidn.es" },
+]
+description = "Sends Pandas DataFrame content to a Bigquery table"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "google-cloud-bigquery",
+    "pyarrow",
+    "pandas"
+]
+
+[project.urls]
+Homepage = "https://github.com/gtm-sidn-datalitica/writeToBigQuery"
+Issues = "https://github.com/gtm-sidn-datalitica/writeToBigQuery/issues"
+
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
