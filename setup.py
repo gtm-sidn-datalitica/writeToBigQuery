@@ -8,7 +8,7 @@ setup(
     python_requires=">=3.9",
     install_requires=[
         "google-cloud-bigquery",
-        "pyarrow==11.0.*",
+        "pyarrow>=11.0.0",
         "pandas==2.2.*",
         "setuptools >= 61.0"
     ],
