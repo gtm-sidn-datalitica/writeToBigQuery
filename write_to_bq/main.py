@@ -2,7 +2,7 @@ from google.cloud import bigquery
 from datetime import datetime
 import pandas as pd
 
-def writeDfToBq(data:pd.DataFrame, project_id:str, dataset_id:str, table_id:str, job_id_prefix:str) -> bigquery.LoadJob:
+def writeDfToBq(data:pd.DataFrame, project_id:str, dataset_id:str, table_id:str, job_id_prefix:str, avoid_duplication:bool=False) -> bigquery.LoadJob:
     """
     Writes a pandas DataFrame to a BigQuery table.
 
@@ -24,6 +24,30 @@ def writeDfToBq(data:pd.DataFrame, project_id:str, dataset_id:str, table_id:str,
     # BigQuery client and table reference
     client = bigquery.Client(project=project_id)
     table = bigquery.Table(f"{project_id}.{dataset_id}.{table_id}")
+
+    if avoid_duplication:
+        dimensions_list = data.select_dtypes(exclude=['number']).columns.tolist()
+        deletion_query_template = f"""DELETE
+        FROM {project_id}.{dataset_id}.{table_id}
+        WHERE {' AND '.join([f'{dim} = @{dim}' for dim in dimensions_list])}
+        """
+
+        for dimensions, _ in data.groupby(dimensions_list):
+            deletion_query = deletion_query_template
+            job_config = bigquery.QueryJobConfig()
+            job_config.query_parameters = [
+                bigquery.ScalarQueryParameter(dim, "STRING", value)
+                for dim, value in zip(dimensions_list, dimensions)
+            ]
+            
+            deletion_job = client.query(
+                deletion_query,
+                job_config=job_config,
+                job_id_prefix=f"{job_id_prefix}_delete_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+            )
+            
+            deletion_job.result()  # Wait for the job to complete
+            print(f"Deletion job completed for dimensions: {dimensions}")
 
     # Load job configuration
     job_config = bigquery.LoadJobConfig()
